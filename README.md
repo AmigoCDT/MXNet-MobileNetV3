@@ -4,10 +4,10 @@ A Gluon implement of MobileNetV3
 ## How to use it？
 ```
 git clone https://www.github.com/deepinsight/insightface.git
-cd insightface/src/symbols`
-cp $MXNet-MobileNetV3/fmobilenetv3.py insightface/src/symbols
+cd insightface/src/symbols
+cp $MXNet-MobileNetV3/fmobilenetv3.py $insightface/recognition/symbols
 ```
-Then follow the insightface's usage to train face recognition, please.
+Then follow the insightface's parallel train usage to train face recognition, please.
 
 
 ## Feel free to contact me
