@@ -290,5 +290,5 @@ def get_symbol(num_classes=256):
     data = (data-127.5)
     data = data*0.0078125
     body = net(data)
-    body = symbol_utils.get_fc1(body, num_classes, "E")
+    # body = symbol_utils.get_fc1(body, num_classes, "E")
     return body
