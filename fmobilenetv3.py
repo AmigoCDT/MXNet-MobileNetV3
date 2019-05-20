@@ -42,8 +42,7 @@ class HSwish(nn.HybridBlock):
         self.out.add(ReLU6())
     
     def hybrid_forward(self, F, x):
-        # return x * F.relu6(x + 3., inplace=self.inplace) / 6.
-        return x * self.out(x+3) / 6.0
+        return x * self.out(x+3.0) / 6.0
 
 
 class HSigmoid(nn.HybridBlock):
