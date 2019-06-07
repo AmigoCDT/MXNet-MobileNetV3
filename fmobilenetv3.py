@@ -274,7 +274,7 @@ class MobileNetV3(nn.HybridBlock):
             self.layers.append(AdaptiveAvgPool2D(output_size=1))
             self.layers.append(HSwish())
             self.layers.append(conv_1x1_bn(last_channel, HSwish()))
-            self.layers.append(num_classes, HSwish())
+            self.layers.append(conv_1x1_bn(num_classes, HSwish()))
         
         self._layers = nn.HybridSequential()
         self._layers.add(*self.layers)
