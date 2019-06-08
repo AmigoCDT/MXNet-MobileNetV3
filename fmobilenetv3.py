@@ -283,14 +283,10 @@ class MobileNetV3(nn.HybridBlock):
         return self._layers(x)
 
 
-def get_symbol(num_classes=256, **kwargs):
-    net = MobileNetV3(num_classes, 1)
+def get_symbol(num_classes=256, mode="large", **kwargs):
+    net = MobileNetV3(num_classes, 1, mode=mode)
     data = mx.sym.Variable(name='data')
     data = (data-127.5)
     data = data*0.0078125
     body = net(data)
-    fc_classes = kwargs.get("fc_classes", 0) # used in insightface
-    if fc_classes:
-        import symbol_utils # file in insightface/src/symbols/
-        body = symbol_utils.get_fc1(body, num_classes, "E")
     return body
