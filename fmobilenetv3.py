@@ -266,15 +266,13 @@ class MobileNetV3(nn.HybridBlock):
             self.layers.append(HSwish())
             self.layers.append(nn.Conv2D(last_channel, 1, 1, 0))
             self.layers.append(HSwish())
-            self.layers.append(nn.Conv2D(num_classes, 1, 1, 0))
         else:
             last_conv = make_divisible(576 * width_mult)
             self.layers.append(conv_1x1_bn(last_channel, HSwish()))
-            self.features.append(SEModule(last_channel)) 
+            self.layers.append(SEModule(last_channel)) 
             self.layers.append(AdaptiveAvgPool2D(output_size=1))
             self.layers.append(HSwish())
             self.layers.append(conv_1x1_bn(last_channel, HSwish()))
-            self.layers.append(conv_1x1_bn(num_classes, HSwish()))
         
         self._layers = nn.HybridSequential()
         self._layers.add(*self.layers)
@@ -289,4 +287,6 @@ def get_symbol(num_classes=256, mode="large", **kwargs):
     data = (data-127.5)
     data = data*0.0078125
     body = net(data)
+    import symbol_utils
+    body = symbol_utils.get_fc1(body, num_classes, "E")
     return body
