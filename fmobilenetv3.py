@@ -38,21 +38,17 @@ class ReLU6(nn.HybridBlock):
 class HSwish(nn.HybridBlock):
     def __init__(self):
         super(HSwish, self).__init__()
-        self.out = nn.HybridSequential()
-        self.out.add(ReLU6())
     
     def hybrid_forward(self, F, x):
-        return x * self.out(x+3.0) / 6.0
+        return x * F.clip(x+3.0, 0, 6)/ 6.0
 
 
 class HSigmoid(nn.HybridBlock):
     def __init__(self):
         super(HSigmoid, self).__init__()
-        self.out = nn.HybridSequential()
-        self.out.add(ReLU6())
     
     def hybrid_forward(self, F, x):
-        return self.out(x+3.0) /6.0
+        return F.clip(x+3.0, 0, 6)/6.0
 
 
 class SEBlock(nn.HybridBlock):
@@ -118,21 +114,19 @@ class SEBlock(nn.HybridBlock):
 
 
 class SEModule(nn.HybridBlock):
-    def __init__(self, channel, reduction=2):
+    def __init__(self, channel, reduction=4):
         super(SEModule, self).__init__()
         # self.avg_pool = nn.contrib.AdaptiveAvgPooling2D()
         self.fc = nn.HybridSequential()
-        self.fc.add(nn.Dense(channel//reduction, use_bias=False),
+        self.fc.add(nn.Conv2D(channel//reduction,kernel_size=1, padding=0, use_bias=False),
                     nn.Activation("relu"),
-                    nn.Dense(channel, use_bias=False),
+                    nn.Conv2D(channel,kernel_size=1, padding=0, use_bias=False),
                     HSigmoid())
     
     def hybrid_forward(self, F, x):
-        res = x
         w = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
         w = self.fc(w)
-        x = F.broadcast_mul(x, w.expand_dims(axis=2).expand_dims(axis=2))
-        x = F.Activation(x + res, act_type='relu')
+        x = F.broadcast_mul(x, w)
         return x
 
 
@@ -206,7 +200,7 @@ class MobileBottleNeck(nn.HybridBlock):
 
 
 class MobileNetV3(nn.HybridBlock):
-    def __init__(self, num_classes, width_mult=1.0, mode="large", **kwargs):
+    def __init__(self, classes=1000, width_mult=1.0, mode="large", **kwargs):
         super(MobileNetV3, self).__init__()
         assert mode in ["large", "small"]
         # assert input_size%32 == 0
@@ -281,8 +275,8 @@ class MobileNetV3(nn.HybridBlock):
         return self._layers(x)
 
 
-def get_symbol(num_classes=256, mode="large", **kwargs):
-    net = MobileNetV3(num_classes, 1, mode=mode)
+def get_symbol(num_classes=256, mode="small", **kwargs):
+    net = MobileNetV3(mode=mode)
     data = mx.sym.Variable(name='data')
     data = (data-127.5)
     data = data*0.0078125
